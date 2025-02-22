@@ -16,16 +16,16 @@ jobs:
         run: |
           pacman -Sy --noconfirm base-devel git sudo
       
-      - name: Create build user
+      - name: Create build user and directory
         run: |
           useradd -m builduser
-          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-          chown -R builduser:builduser /github/workspace
+          mkdir -p /build
+          chown -R builduser:builduser /build
       
       - name: Clone and build AUR package
         run: |
           sudo -u builduser bash -c "
-          cd /github/workspace
+          cd /build
           git clone https://aur.archlinux.org/nody-greeter.git aur-package
           cd aur-package
           makepkg -s --noconfirm
@@ -35,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: built-package
-          path: aur-package/*.pkg.tar.zst
+          path: /build/aur-package/*.pkg.tar.zst
