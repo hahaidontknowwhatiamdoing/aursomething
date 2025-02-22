@@ -9,16 +9,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: archlinux:latest  # Using Arch Linux container
+    container: archlinux:latest  # Use Arch Linux container
 
     steps:
       - name: Install dependencies
         run: |
           pacman -Sy --noconfirm base-devel git sudo
       
-      - name: Create build user and directory
+      - name: Create build user and grant permissions
         run: |
           useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           mkdir -p /build
           chown -R builduser:builduser /build
       
@@ -28,7 +29,7 @@ jobs:
           cd /build
           git clone https://aur.archlinux.org/nody-greeter.git aur-package
           cd aur-package
-          makepkg -s --noconfirm
+          makepkg -s --noconfirm --needed
           "
       
       - name: Upload built package
