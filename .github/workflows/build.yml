@@ -9,24 +9,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: archlinux:latest
+    container: archlinux:latest  # Arch container
 
     steps:
-      - name: Install base dependencies
+      - name: Update system and install base dependencies
         run: |
+          pacman -Sy --noconfirm archlinux-keyring
+          pacman -Syu --noconfirm  # Full system update to prevent lib issues
           pacman -Sy --noconfirm base-devel git sudo icu
-      
+
       - name: Create build user and grant permissions
         run: |
           useradd -m builduser
           echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           mkdir -p /build
           chown -R builduser:builduser /build
-      
+
       - name: Install required versions of Node.js and npm
         run: |
           pacman -Sy --noconfirm nodejs-lts-iron npm
-      
+
       - name: Clone and build AUR package
         run: |
           sudo -u builduser bash -c "
@@ -35,7 +37,7 @@ jobs:
           cd aur-package
           makepkg -s --noconfirm --needed
           "
-      
+
       - name: Upload built package
         uses: actions/upload-artifact@v4
         with:
