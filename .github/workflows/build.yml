@@ -1,0 +1,28 @@
+name: Build AUR Package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest  
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman -Sy --noconfirm base-devel git
+      
+      - name: Clone AUR Package
+        run: |
+          git clone https://aur.archlinux.org/nody-greeter.git aur-package
+          cd aur-package
+          makepkg -s --noconfirm
+
+      - name: Upload built package
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-package
+          path: aur-package/*.pkg.tar.zst
