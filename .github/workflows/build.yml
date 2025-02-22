@@ -9,18 +9,28 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: archlinux:latest  
+    container: archlinux:latest  # Using Arch Linux container
+
     steps:
       - name: Install dependencies
         run: |
-          pacman -Sy --noconfirm base-devel git
+          pacman -Sy --noconfirm base-devel git sudo
       
-      - name: Clone AUR Package
+      - name: Create build user
         run: |
+          useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chown -R builduser:builduser /github/workspace
+      
+      - name: Clone and build AUR package
+        run: |
+          sudo -u builduser bash -c "
+          cd /github/workspace
           git clone https://aur.archlinux.org/nody-greeter.git aur-package
           cd aur-package
           makepkg -s --noconfirm
-
+          "
+      
       - name: Upload built package
         uses: actions/upload-artifact@v4
         with:
