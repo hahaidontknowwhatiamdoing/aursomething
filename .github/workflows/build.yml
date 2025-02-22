@@ -9,10 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: archlinux:latest  # Use Arch Linux container
+    container: archlinux:latest
 
     steps:
-      - name: Install dependencies
+      - name: Install base dependencies
         run: |
           pacman -Sy --noconfirm base-devel git sudo
       
@@ -22,6 +22,10 @@ jobs:
           echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           mkdir -p /build
           chown -R builduser:builduser /build
+      
+      - name: Install required versions of Node.js and npm
+        run: |
+          pacman -Sy --noconfirm nodejs-lts-iron npm
       
       - name: Clone and build AUR package
         run: |
