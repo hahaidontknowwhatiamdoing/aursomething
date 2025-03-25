@@ -1,0 +1,41 @@
+name: Build AUR Package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest  # Arch container
+
+    steps:
+      - name: Update system and install base dependencies
+        run: |
+          pacman -Sy --noconfirm archlinux-keyring
+          pacman -Syu --noconfirm  # Full system update to prevent lib issues
+          pacman -Sy --noconfirm base-devel git sudo
+
+      - name: Create build user and grant permissions
+        run: |
+          useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          mkdir -p /build
+          chown -R builduser:builduser /build
+
+      - name: Clone and build AUR package
+        run: |
+          sudo -u builduser bash -c "
+          cd /build
+          git clone https://aur.archlinux.org/python-fabric-git.git aur-package
+          cd aur-package
+          makepkg -s --noconfirm --needed
+          "
+
+      - name: Upload built package
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-fabric-git
+          path: /build/aur-package/*.pkg.tar.zst
