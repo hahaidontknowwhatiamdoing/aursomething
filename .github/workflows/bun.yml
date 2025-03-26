@@ -1,6 +1,7 @@
 name: Build Bun AUR Package
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -19,7 +20,7 @@ jobs:
           
           # Install base and all required dependencies
           pacman -Sy --noconfirm base-devel git sudo ccache \
-          clang cmake go icu75 libdeflate libiconv lld llvm ninja \
+          clang cmake go libdeflate libiconv lld llvm ninja \
           nodejs mold python ruby rust unzip yarn
 
       - name: Create build user and grant permissions
@@ -28,6 +29,15 @@ jobs:
           echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           mkdir -p /build
           chown -R builduser:builduser /build
+
+      - name: Install ICU75 from AUR
+        run: |
+          sudo -u builduser bash -c "
+          cd /build
+          git clone https://aur.archlinux.org/icu75.git
+          cd icu75
+          makepkg -si --noconfirm
+          "
 
       - name: Clone and build Bun AUR package
         run: |
