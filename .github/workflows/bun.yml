@@ -1,4 +1,4 @@
-name: Build AUR Package
+name: Build Bun AUR Package
 
 on:
   push:
@@ -9,13 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: archlinux:latest  # Arch container
+    container: archlinux:latest  # Use Arch Linux container
 
     steps:
       - name: Update system and install base dependencies
         run: |
           pacman -Sy --noconfirm archlinux-keyring
-          pacman -Syu --noconfirm  # Full system update to prevent lib issues
+          pacman -Syu --noconfirm  # Full system update
           pacman -Sy --noconfirm base-devel git sudo
 
       - name: Create build user and grant permissions
@@ -25,7 +25,7 @@ jobs:
           mkdir -p /build
           chown -R builduser:builduser /build
 
-      - name: Clone and build AUR package
+      - name: Clone and build Bun AUR package
         run: |
           sudo -u builduser bash -c "
           cd /build
@@ -37,5 +37,5 @@ jobs:
       - name: Upload built package
         uses: actions/upload-artifact@v4
         with:
-          name: python-fabric-git
+          name: bun-aur
           path: /build/aur-package/*.pkg.tar.zst
