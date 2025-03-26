@@ -16,7 +16,11 @@ jobs:
         run: |
           pacman -Sy --noconfirm archlinux-keyring
           pacman -Syu --noconfirm  # Full system update
-          pacman -Sy --noconfirm base-devel git sudo ccache
+          
+          # Install base and all required dependencies
+          pacman -Sy --noconfirm base-devel git sudo ccache \
+          clang cmake go icu75 libdeflate libiconv lld llvm ninja \
+          nodejs mold python ruby rust unzip yarn
 
       - name: Create build user and grant permissions
         run: |
