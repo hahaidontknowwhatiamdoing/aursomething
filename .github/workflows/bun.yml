@@ -16,7 +16,7 @@ jobs:
         run: |
           pacman -Sy --noconfirm archlinux-keyring
           pacman -Syu --noconfirm  # Full system update
-          pacman -Sy --noconfirm base-devel git sudo
+          pacman -Sy --noconfirm base-devel git sudo ccache
 
       - name: Create build user and grant permissions
         run: |
