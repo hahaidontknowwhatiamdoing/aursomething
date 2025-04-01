@@ -1,0 +1,45 @@
+name: Build WineGUI AUR Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest  # Use Arch Linux container
+
+    steps:
+      - name: Update system and install base dependencies
+        run: |
+          pacman -Sy --noconfirm archlinux-keyring
+          pacman -Syu --noconfirm  # Full system update
+          
+          # Install base and all required dependencies
+          pacman -Sy --noconfirm base-devel git sudo ccache \
+          gtkmm3 cabextract unzip p7zip wget wine
+
+      - name: Create build user and grant permissions
+        run: |
+          useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          mkdir -p /build
+          chown -R builduser:builduser /build
+
+      - name: Clone and build WineGUI AUR package
+        run: |
+          sudo -u builduser bash -c "
+          cd /build
+          git clone https://aur.archlinux.org/winegui-bin.git aur-package
+          cd aur-package
+          makepkg -s --noconfirm --needed
+          "
+
+      - name: Upload built package
+        uses: actions/upload-artifact@v4
+        with:
+          name: winegui-bin-aur
+          path: /build/aur-package/*.pkg.tar.zst
